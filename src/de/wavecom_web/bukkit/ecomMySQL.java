@@ -102,7 +102,6 @@ public final class ecomMySQL extends JavaPlugin {
                 } else {
                
                 	if(perms.has(player, "wavecom.stadt.armedanien")){
-                		sender.sendMessage("Einzahlen Armedanien Stadtkasse");
                 		EconomyResponse r1 = econ.withdrawPlayer(player.getName(), java.lang.Double.parseDouble(args[1]));
                 		
                 		if(r1.transactionSuccess()) {
@@ -114,10 +113,24 @@ public final class ecomMySQL extends JavaPlugin {
                 		
                 		
                 	} else if(perms.has(player, "wavecom.stadt.karafiliem")){
-                		sender.sendMessage("Einzahlen Karafiliem Stadtkasse");
+                		EconomyResponse r1 = econ.withdrawPlayer(player.getName(), java.lang.Double.parseDouble(args[1]));
+                		
+                		if(r1.transactionSuccess()) {
+                			EconomyResponse r2 = econ.bankDeposit("Karafiliem", java.lang.Double.parseDouble(args[1]));
+                			if(r2.transactionSuccess()) {
+                				sender.sendMessage(String.format("Du hast erfolgreich %s eingezahlt!", econ.format(r2.amount)));
+                			}
+                		}
                 		
                 	} else if(perms.has(player, "wavecom.stadt.raquilem")){
-                		sender.sendMessage("Einzahlen Raquilem Stadtkasse");
+                		EconomyResponse r1 = econ.withdrawPlayer(player.getName(), java.lang.Double.parseDouble(args[1]));
+                		
+                		if(r1.transactionSuccess()) {
+                			EconomyResponse r2 = econ.bankDeposit("Raquilem", java.lang.Double.parseDouble(args[1]));
+                			if(r2.transactionSuccess()) {
+                				sender.sendMessage(String.format("Du hast erfolgreich %s eingezahlt!", econ.format(r2.amount)));
+                			}
+                		}
                 		
                 	} else {
                 		
@@ -139,13 +152,36 @@ public final class ecomMySQL extends JavaPlugin {
                 	if(perms.has(player, "wavecom.stadt.auszahlen")){
                 		
                 		if(perms.has(player, "wavecom.stadt.armedanien")){
-                			sender.sendMessage("Auszahlen Armedanien Stadtkasse");
+                    		EconomyResponse r1 = econ.bankWithdraw("Armedanien", java.lang.Double.parseDouble(args[1]));
+                    		
+                    		if(r1.transactionSuccess()) {
+                    			EconomyResponse r2 = econ.depositPlayer(player.getName(), java.lang.Double.parseDouble(args[1]));
+                    			if(r2.transactionSuccess()) {
+                    				sender.sendMessage(String.format("Du hast erfolgreich %s ausgezahlt!", econ.format(r2.amount)));
+                    			}
+                    		}
                 			
                 		} else if(perms.has(player, "wavecom.stadt.karafiliem")){
-                			sender.sendMessage("Auszahlen Karafiliem Stadtkasse");
+                    		EconomyResponse r1 = econ.bankWithdraw("Karafiliem", java.lang.Double.parseDouble(args[1]));
+                    		
+                    		if(r1.transactionSuccess()) {
+                    			EconomyResponse r2 = econ.depositPlayer(player.getName(), java.lang.Double.parseDouble(args[1]));
+                    			if(r2.transactionSuccess()) {
+                    				sender.sendMessage(String.format("Du hast erfolgreich %s ausgezahlt!", econ.format(r2.amount)));
+                    			}
+                    		}
+                			
             			
                 		} else if(perms.has(player, "wavecom.stadt.raquilem")){
-                			sender.sendMessage("Auszahlen Raquilem Stadtkasse");
+                    		EconomyResponse r1 = econ.bankWithdraw("Raquilem", java.lang.Double.parseDouble(args[1]));
+                    		
+                    		if(r1.transactionSuccess()) {
+                    			EconomyResponse r2 = econ.depositPlayer(player.getName(), java.lang.Double.parseDouble(args[1]));
+                    			if(r2.transactionSuccess()) {
+                    				sender.sendMessage(String.format("Du hast erfolgreich %s ausgezahlt!", econ.format(r2.amount)));
+                    			}
+                    		}
+                			
                 			
                 		} else if (perms.getPrimaryGroup(player).equalsIgnoreCase("admin")){
                 			sender.sendMessage("Es gab ein Error mit deinen Adminrechten! Kontaktiere wavecom.");
@@ -162,13 +198,13 @@ public final class ecomMySQL extends JavaPlugin {
             } else if (args[0].equalsIgnoreCase("info")){
             	
             	if(perms.has(player, "wavecom.stadt.armedanien")){
-            		sender.sendMessage("Info Armedanien Stadtkasse");
+            		sender.sendMessage(String.format("Die Stadtkasse beträgt: %s", econ.bankBalance("Armedanien")));
             		
             	} else if(perms.has(player, "wavecom.stadt.karafiliem")){
-            		sender.sendMessage("Info Karafiliem Stadtkasse");
+            		sender.sendMessage(String.format("Die Stadtkasse beträgt: %s", econ.bankBalance("Karafiliem")));
             		
             	} else if(perms.has(player, "wavecom.stadt.raquilem")){
-            		sender.sendMessage("Info Raquilem Stadtkasse");
+            		sender.sendMessage(String.format("Die Stadtkasse beträgt: %s", econ.bankBalance("Raquilem")));
             		
             	} else {
             		if (perms.getPrimaryGroup(player).equalsIgnoreCase("admin")){

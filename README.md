@@ -3,6 +3,9 @@ Ecom Stadtverwaltung
 
 (c) wavecom
 
-www.das-forum.eu
-www.wavecom-web.de
-ecom.wavecom-web.de
+http://www.das-forum.eu
+
+http://www.wavecom-web.de
+
+http://ecom.wavecom-web.de
+

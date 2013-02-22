@@ -1,6 +1,10 @@
 package de.wavecom_web.bukkit;
 
 import java.util.logging.Logger;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
@@ -13,12 +17,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+
 public final class ecomMySQL extends JavaPlugin {
+	
+	String url = "jdbc:mysql://localhost:3306/DB";
+	String user = "";
+	String pass = "";
 	 
     private static final Logger log = Logger.getLogger("Minecraft");
     public static Economy econ = null;
     public static Permission perms = null;
     public static Chat chat = null;
+    
 
     @Override
     public void onDisable() {
@@ -34,9 +44,10 @@ public final class ecomMySQL extends JavaPlugin {
         }
         setupPermissions();
         setupChat();
-        log.info("Ecom MySQL Writer by wavecom wurde erfolgreich geladen!");
+        log.info("Ecom Stadtverwaltung by wavecom wurde erfolgreich geladen!");
     }
 
+    
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
@@ -204,9 +215,79 @@ public final class ecomMySQL extends JavaPlugin {
             	sender.sendMessage("/stadtkasse info - Zeigt Stadtkasse an");
         	}
             return true;
+        } else if(command.getLabel().equals("stadtwahl")) {
+        	
+        	if(perms.getPrimaryGroup(player).equalsIgnoreCase("newbie")){
+        		if (args.length < 1) {
+                	sender.sendMessage("===== Stadtwahl =====");
+                	sender.sendMessage("Raquilem: /stadtwahl raquilemer");
+                	sender.sendMessage("Armedanien: /stadtwahl armedaner");
+                	sender.sendMessage("Karafilem: /stadtwahl karafiliemer");
+                	
+                } else if (args.length > 1) {
+                	sender.sendMessage("===== Stadtwahl =====");
+                	sender.sendMessage("Raquilem: /stadtwahl raquilem");
+                	sender.sendMessage("Armedanien: /stadtwahl armedanien");
+                	sender.sendMessage("Karafilem: /stadtwahl karafiliem");
+                	
+                } else if (args[0].equalsIgnoreCase("raquilem")){
+                	perms.playerAddGroup(player, "raquilemer");
+                	perms.playerRemoveGroup(player, "newbie");
+                	sender.sendMessage("Du gehörst nun Raquilem an!");
+                	
+					try {
+						Connection conn = DriverManager.getConnection(url, user, pass);
+						PreparedStatement sampleQueryStatement;
+						sampleQueryStatement = conn.prepareStatement("INSERT INTO `"+user+"`.`stadtverwaltung_spieler` (`Spieler`, `Stadt`) VALUES ('"+player.getName()+"', '1');");
+						sampleQueryStatement.executeUpdate();
+						sampleQueryStatement.close(); 
+					} catch (SQLException e) {
+						sender.sendMessage("Datenbankfehler!");
+						e.printStackTrace();
+					}
+                	
+                } else if (args[0].equalsIgnoreCase("armedanien")){
+                	perms.playerAddGroup(player, "armedaner");
+                	perms.playerRemoveGroup(player, "newbie");
+                	sender.sendMessage("Du gehörst nun Armedanien an!");
+                	
+					try {
+						Connection conn = DriverManager.getConnection(url, user, pass);
+						PreparedStatement sampleQueryStatement;
+						sampleQueryStatement = conn.prepareStatement("INSERT INTO `"+user+"`.`stadtverwaltung_spieler` (`Spieler`, `Stadt`) VALUES ('"+player.getName()+"', '2');");
+						sampleQueryStatement.executeUpdate();
+						sampleQueryStatement.close(); 
+					} catch (SQLException e) {
+						sender.sendMessage("Datenbankfehler!");
+						e.printStackTrace();
+					}
+                	
+                } else if (args[0].equalsIgnoreCase("karafiliem")){
+                	perms.playerAddGroup(player, "karafiliemer");
+                	perms.playerRemoveGroup(player, "newbie");
+                	sender.sendMessage("Du gehörst nun Karafiliem an!");
+                	
+					try {
+						Connection conn = DriverManager.getConnection(url, user, pass);
+						PreparedStatement sampleQueryStatement;
+						sampleQueryStatement = conn.prepareStatement("INSERT INTO `"+user+"`.`stadtverwaltung_spieler` (`Spieler`, `Stadt`) VALUES ('"+player.getName()+"', '3');");
+						sampleQueryStatement.executeUpdate();
+						sampleQueryStatement.close(); 
+					} catch (SQLException e) {
+						sender.sendMessage("Datenbankfehler!");
+						e.printStackTrace();
+					}
+                	
+                } else {
+            		sender.sendMessage("Diese Stadt gibt es nicht!");
+                }
+        	}else {
+        		sender.sendMessage("Du darfst keine Stadt mehr wählen!");
+        	}
+        	
+        	return true;
         } else {
-        	sender.sendMessage("Command Error");
-            return false;
+        	return false;
         }
-    }
+	}
 }       

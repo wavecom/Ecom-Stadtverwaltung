@@ -1,18 +1,15 @@
-name: EcomMySQL
+name: EcomStadtverwaltung
 main: de.wavecom_web.bukkit.ecomMySQL
 version: 1.0
 depend: [Vault] 
 commands:
-   test-economy:
-      description: This is a demo command.
-      usage: /<command> [player]
-   test-permission:
-      description: This is a demo command.
-      usage: /<command> [player]
-      permission: example.plugin.awesome
-      permission-message: You don't have <permission>
    stadtkasse:
-      description: This is a demo command.
-      usage: /<command> [player]
+      description: Stadtkasse.
+      usage: /<command>
       permission: wavecom.stadt
+      permission-message: You don't have <permission>
+   stadtwahl:
+      description: Stadtwahl.
+      usage: /<command>
+      permission: wavecom.stadtwahl
       permission-message: You don't have <permission>

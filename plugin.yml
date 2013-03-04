@@ -1,15 +1,20 @@
 name: EcomStadtverwaltung
 main: de.wavecom_web.bukkit.ecomMySQL
 version: 1.0
-depend: [Vault] 
+depend: [Vault, WorldGuard] 
 commands:
    stadtkasse:
       description: Stadtkasse.
       usage: /<command>
-      permission: wavecom.stadt
-      permission-message: You don't have <permission>
    stadtwahl:
       description: Stadtwahl.
       usage: /<command>
-      permission: wavecom.stadtwahl
-      permission-message: You don't have <permission>
+   getlizenz:
+      description: Getlizenz.
+      usage: /<command>
+   canceljob:
+      description: Job beenden.
+      usage: /<command>
+   lizenzgetrights:
+      description: Rechtevergabe fuer WorldGuard Lizenz vergebung.
+      usage: /<command>

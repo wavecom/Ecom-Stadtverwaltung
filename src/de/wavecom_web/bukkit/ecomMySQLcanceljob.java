@@ -127,7 +127,7 @@ public class ecomMySQLcanceljob implements CommandExecutor {
 						sampleQueryStatement.executeUpdate();
 						sampleQueryStatement.close(); 
 						ecomMySQL.perms.playerAdd(player, "wavecom.lizenz.inTast.cancel.g");
-						sender.sendMessage(ChatColor.YELLOW + "Sicherheitskontrolle: Bitte gib /cancelgräber ein um den Job zu kündigen!");
+						sender.sendMessage(ChatColor.YELLOW + "Schritt 2:: Bitte gib /cancelgräber ein um den Job zu kündigen!");
 						
 					} catch (SQLException e) {
 						sender.sendMessage("Datenbankfehler!");
@@ -142,7 +142,7 @@ public class ecomMySQLcanceljob implements CommandExecutor {
 						sampleQueryStatement.executeUpdate();
 						sampleQueryStatement.close(); 
 						ecomMySQL.perms.playerAdd(player, "wavecom.lizenz.inTast.cancel.h");
-						sender.sendMessage(ChatColor.YELLOW + "Sicherheitskontrolle: Bitte gib /cancelholzfäller ein um den Job zu kündigen!");
+						sender.sendMessage(ChatColor.YELLOW + "Schritt 2:: Bitte gib /cancelholzfäller ein um den Job zu kündigen!");
 						
 					} catch (SQLException e) {
 						sender.sendMessage("Datenbankfehler!");
@@ -157,7 +157,7 @@ public class ecomMySQLcanceljob implements CommandExecutor {
 						sampleQueryStatement.executeUpdate();
 						sampleQueryStatement.close(); 
 						ecomMySQL.perms.playerAdd(player, "wavecom.lizenz.inTast.cancel.m");
-						sender.sendMessage(ChatColor.YELLOW + "Sicherheitskontrolle: Bitte gib /cancelminer ein um den Job zu kündigen!");
+						sender.sendMessage(ChatColor.YELLOW + "Schritt 2:: Bitte gib /cancelminer ein um den Job zu kündigen!");
 						
 					} catch (SQLException e) {
 						sender.sendMessage("Datenbankfehler!");
@@ -172,6 +172,23 @@ public class ecomMySQLcanceljob implements CommandExecutor {
 						sampleQueryStatement.executeUpdate();
 						sampleQueryStatement.close(); 
 						ecomMySQL.perms.playerRemove(player, "modifyworld.damage.deal.animal.*");
+						ecomMySQL.perms.playerRemove(player, "animalprotect.bypass");
+						ecomMySQL.perms.playerRemove(player, "-wavecom.lizenz.1");
+						ecomMySQL.perms.playerRemove(player, "wavecom.lizenz.2");
+						sender.sendMessage(ChatColor.YELLOW + "Du hast deinen Job gekündigt!");
+					} catch (SQLException e) {
+						sender.sendMessage("Datenbankfehler!");
+						e.printStackTrace();
+					}
+//Händler			
+				} else if (job.equalsIgnoreCase("händler")){
+					try {
+						Connection conn1 = DriverManager.getConnection(ecomMySQL.url, ecomMySQL.user, ecomMySQL.pass);
+						PreparedStatement sampleQueryStatement;
+						sampleQueryStatement = conn1.prepareStatement("UPDATE  `"+ecomMySQL.user+"`.`stadtverwaltung_spieler`  SET  `lizenz` =  '',`lizenz_date` =  '' WHERE  `stadtverwaltung_spieler`.`Spieler` =  '"+player.getName()+"';");
+						sampleQueryStatement.executeUpdate();
+						sampleQueryStatement.close(); 
+						ecomMySQL.perms.playerRemove(player, "ChestShop.shop.create.*");
 						ecomMySQL.perms.playerRemove(player, "-wavecom.lizenz.1");
 						ecomMySQL.perms.playerRemove(player, "wavecom.lizenz.2");
 						sender.sendMessage(ChatColor.YELLOW + "Du hast deinen Job gekündigt!");
@@ -238,6 +255,13 @@ public class ecomMySQLcanceljob implements CommandExecutor {
     					ecomMySQL.perms.playerRemove(player, "modifyworld.items.craft.woodhoe");
     					ecomMySQL.perms.playerRemove(player, "modifyworld.items.craft.flintandsteel");
     					ecomMySQL.perms.playerRemove(player, "modifyworld.items.craft.bow");
+    					
+
+    					ecomMySQL.perms.playerRemove(player, "modifyworld.items.put.*.of.anvil");
+    	    			ecomMySQL.perms.playerRemove(player, "modifyworld.items.take.*.of.anvil");
+    	    	    	ecomMySQL.perms.playerRemove(player, "modifyworld.blocks.interact.anvil:*");
+    	    	    	ecomMySQL.perms.playerRemove(player, "modifyworld.blocks.interact.anvil");
+    					
 						sender.sendMessage(ChatColor.YELLOW + "Du hast deinen Job gekündigt!");
 					} catch (SQLException e) {
 						sender.sendMessage("Datenbankfehler!");

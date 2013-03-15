@@ -6,11 +6,19 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import com.sk89q.worldguard.domains.DefaultDomain;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 public class ecomMySQLgetlizenz implements CommandExecutor {
 	
@@ -39,13 +47,20 @@ public class ecomMySQLgetlizenz implements CommandExecutor {
 
     	if(command.getLabel().equals("getlizenz")) {
     		
+    		
     		ecomMySQL x = new ecomMySQL();
     		if (!x.checkUser(player.getName()) == true){
     			return true;
     		} 
+    		x.setOwner(player, "grube2");
     		
     		if(args.length < 1) {
-    			sender.sendMessage("Error: Kein Job angegeben!");
+    			sender.sendMessage("==================");
+    			sender.sendMessage(ChatColor.GOLD + "Jobliste:");
+    			sender.sendMessage(ChatColor.GOLD + "Schmelzer, Gräber, Holzfäller,");
+    			sender.sendMessage(ChatColor.GOLD + "Miner, Jäger, Schmied");
+    			sender.sendMessage(ChatColor.RED + "Verwendung: /getlizenz [JOB]");
+    			sender.sendMessage(ChatColor.RED + "Pro Stadt und Job nur 2 Personen!");
     			return true;
     			
     		} else if(args.length > 1){
@@ -107,7 +122,7 @@ public class ecomMySQLgetlizenz implements CommandExecutor {
     					sender.sendMessage("Datenbank Fehler");
     					e.printStackTrace();
     				}
-    				sender.sendMessage("Sicherheitskontrolle:");
+    				sender.sendMessage("Schritt 2:");
     				sender.sendMessage("Gib bitte /gräberlizenz ein, um die Lizenz zu bestätigen!!!");
 	//Miner			
     			} else if (args[0].equalsIgnoreCase("miner")){
@@ -126,11 +141,12 @@ public class ecomMySQLgetlizenz implements CommandExecutor {
 						sampleQueryStatement.executeUpdate();
 						sampleQueryStatement.close(); 
 						ecomMySQL.perms.playerAdd(player, "wavecom.lizenz.inTask.m");
+						
     				} catch (SQLException e) {
     					sender.sendMessage("Datenbank Fehler");
     					e.printStackTrace();
     				}
-    				sender.sendMessage("Sicherheitskontrolle:");
+    				sender.sendMessage("Schritt 2:");
     				sender.sendMessage("Gib bitte /minerlizenz ein, um die Lizenz zu bestätigen!!!");
 	//Holzfäller			
     			} else if (args[0].equalsIgnoreCase("holzfäller")){
@@ -152,7 +168,7 @@ public class ecomMySQLgetlizenz implements CommandExecutor {
     					sender.sendMessage("Datenbank Fehler");
     					e.printStackTrace();
     				}
-    				sender.sendMessage("Sicherheitskontrolle:");
+    				sender.sendMessage("Schritt 2:");
     				sender.sendMessage("Gib bitte /holzfällerlizenz ein, um die Lizenz zu bestätigen!!!");
 	//Jäger			
     			} else if (args[0].equalsIgnoreCase("jäger")){
@@ -170,6 +186,7 @@ public class ecomMySQLgetlizenz implements CommandExecutor {
 						sampleQueryStatement.executeUpdate();
 						sampleQueryStatement.close(); 
 						ecomMySQL.perms.playerAdd(player, "modifyworld.damage.deal.animal.*");
+						ecomMySQL.perms.playerAdd(player, "animalprotect.bypass");
     				} catch (SQLException e) {
     					sender.sendMessage("Datenbank Fehler");
     					e.printStackTrace();
@@ -177,6 +194,30 @@ public class ecomMySQLgetlizenz implements CommandExecutor {
     				sender.sendMessage(ChatColor.YELLOW + "================================");
     				sender.sendMessage(ChatColor.YELLOW + "Du bist nun Jäger!");
     				sender.sendMessage(ChatColor.YELLOW + "Als Jäger kannst du Tiere töten.");
+    				sender.sendMessage(ChatColor.YELLOW + "================================");
+	//Händler		
+    			} else if (args[0].equalsIgnoreCase("händler")){
+    				
+    				if (x.checkJobLimit("Jäger", sender) == false){
+    					sender.sendMessage("Das maximale Joblimit für diesen Job ist erreicht!");
+    					return true;
+    				}
+    				
+        			ecomMySQL.perms.playerAdd(player, "wavecom.lizenz.2");
+        			ecomMySQL.perms.playerAdd(player, "-wavecom.lizenz.1");
+    				try {
+    					PreparedStatement sampleQueryStatement;
+						sampleQueryStatement = conn.prepareStatement("UPDATE  `"+ecomMySQL.user+"`.`stadtverwaltung_spieler` SET  `lizenz` =  '"+args[0]+"',`lizenz_date` =  '"+dt+"' WHERE  `stadtverwaltung_spieler`.`Spieler` =  '"+player.getName()+"' LIMIT 1 ;");
+						sampleQueryStatement.executeUpdate();
+						sampleQueryStatement.close(); 
+						ecomMySQL.perms.playerAdd(player, "ChestShop.shop.create.*");
+    				} catch (SQLException e) {
+    					sender.sendMessage("Datenbank Fehler");
+    					e.printStackTrace();
+    				}
+    				sender.sendMessage(ChatColor.YELLOW + "================================");
+    				sender.sendMessage(ChatColor.YELLOW + "Du bist nun Händler!");
+    				sender.sendMessage(ChatColor.YELLOW + "Du kannst nun ChestShops aufstellen.");
     				sender.sendMessage(ChatColor.YELLOW + "================================");
      //Schmied   			
     			} else if (args[0].equalsIgnoreCase("schmied")){
@@ -222,6 +263,11 @@ public class ecomMySQLgetlizenz implements CommandExecutor {
     					ecomMySQL.perms.playerAdd(player, "modifyworld.items.craft.woodhoe");
     					ecomMySQL.perms.playerAdd(player, "modifyworld.items.craft.flintandsteel");
     					ecomMySQL.perms.playerAdd(player, "modifyworld.items.craft.bow");
+    					
+    					ecomMySQL.perms.playerAdd(player, "modifyworld.items.put.*.of.anvil");
+    	    			ecomMySQL.perms.playerAdd(player, "modifyworld.items.take.*.of.anvil");
+    	    	    	ecomMySQL.perms.playerAdd(player, "modifyworld.blocks.interact.anvil:*");
+    	    	    	ecomMySQL.perms.playerAdd(player, "modifyworld.blocks.interact.anvil");
 				    
     				} catch (SQLException e) {
     					sender.sendMessage("Datenbank Fehler");
@@ -238,7 +284,8 @@ public class ecomMySQLgetlizenz implements CommandExecutor {
     		} else if (ecomMySQL.perms.has(player, "wavecom.lizenz.2")){ // eine Lizens + 1 wenn VIP
     			if (ecomMySQL.perms.has(player, "wavecom.vip")){
     //Lizenzgebung 2te Lizens VIP
-    			
+    				sender.sendMessage(ChatColor.BLACK + "Wilkommen im ewigen schwarzem Nichts!");
+    				sender.sendMessage(ChatColor.RED + "Leider ist die zweite VIP Lizenz noch nich einsatzbereit!");
     //Ende Lizenzgebung 2te Lizens VIP
     			
     			} else {

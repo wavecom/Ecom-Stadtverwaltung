@@ -5,6 +5,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -55,6 +58,12 @@ public class ecomMySQLstadtwahl implements CommandExecutor {
 						sampleQueryStatement = conn.prepareStatement("INSERT INTO `"+ecomMySQL.user+"`.`stadtverwaltung_spieler` (`Spieler`, `Stadt`, `lizenz`, `lizenz_date`, `viplizenz`, `viplizenz_date`) VALUES ('"+player.getName()+"', '1', '', '', '', '');");
 						sampleQueryStatement.executeUpdate();
 						sampleQueryStatement.close(); 
+						player.teleport(new Location(Bukkit.getWorld("ecomMedieval"), -117, 76, 1017));
+						sender.sendMessage(ChatColor.LIGHT_PURPLE+"Wilkommen in " + args[0]);
+						sender.sendMessage(ChatColor.GREEN+"Hier ein paar Tipps für den Start:");
+						sender.sendMessage(ChatColor.GREEN+"-> Such dir ein Grundstück!");
+						sender.sendMessage(ChatColor.GREEN+"-> Nimm einen Job mit /getlizenz an!");
+						sender.sendMessage(ChatColor.GREEN+"-> Bau dein Haus und handle mit den anderen!");
 		                
 					} catch (SQLException e) {
 						sender.sendMessage("Datenbankfehler!");
@@ -73,6 +82,12 @@ public class ecomMySQLstadtwahl implements CommandExecutor {
 						sampleQueryStatement = conn.prepareStatement("INSERT INTO `"+ecomMySQL.user+"`.`stadtverwaltung_spieler` (`Spieler`, `Stadt`, `lizenz`, `lizenz_date`, `viplizenz`, `viplizenz_date`) VALUES ('"+player.getName()+"', '2', '', '', '', '');");
 						sampleQueryStatement.executeUpdate();
 						sampleQueryStatement.close(); 
+						player.teleport(new Location(Bukkit.getWorld("ecomMedieval"), 453, 72, 505));
+						sender.sendMessage(ChatColor.LIGHT_PURPLE+"Wilkommen in " + args[0]);
+						sender.sendMessage(ChatColor.GREEN+"Hier ein paar Tipps für den Start:");
+						sender.sendMessage(ChatColor.GREEN+"-> Such dir ein Grundstück!");
+						sender.sendMessage(ChatColor.GREEN+"-> Nimm einen Job mit /getlizenz an!");
+						sender.sendMessage(ChatColor.GREEN+"-> Bau dein Haus und handle mit den anderen!");
 					} catch (SQLException e) {
 						sender.sendMessage("Datenbankfehler!");
 						e.printStackTrace();
@@ -90,6 +105,12 @@ public class ecomMySQLstadtwahl implements CommandExecutor {
 						sampleQueryStatement = conn.prepareStatement("INSERT INTO `"+ecomMySQL.user+"`.`stadtverwaltung_spieler` (`Spieler`, `Stadt`, `lizenz`, `lizenz_date`, `viplizenz`, `viplizenz_date`) VALUES ('"+player.getName()+"', '3', '', '', '', '');");
 						sampleQueryStatement.executeUpdate();
 						sampleQueryStatement.close(); 
+						player.teleport(new Location(Bukkit.getWorld("ecomMedieval"), -346, 72, -166));
+						sender.sendMessage(ChatColor.LIGHT_PURPLE+"Wilkommen in " + args[0]);
+						sender.sendMessage(ChatColor.GREEN+"Hier ein paar Tipps für den Start:");
+						sender.sendMessage(ChatColor.GREEN+"-> Such dir ein Grundstück!");
+						sender.sendMessage(ChatColor.GREEN+"-> Nimm einen Job mit /getlizenz an!");
+						sender.sendMessage(ChatColor.GREEN+"-> Bau dein Haus und handle mit den anderen!");
 					} catch (SQLException e) {
 						sender.sendMessage("Datenbankfehler!");
 						e.printStackTrace();

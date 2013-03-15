@@ -18,3 +18,21 @@ commands:
    lizenzgetrights:
       description: Rechtevergabe fuer WorldGuard Lizenz vergebung.
       usage: /<command>
+   editstadt:
+      description: Stadt eines Users veraendern.
+      usage: /<command>
+   deljob:
+      description: Lizenz zuruecksetzten.
+      usage: /<command>
+   muteall:
+      description: Alle muten
+      usage: /<command>
+   unmuteall:
+      description: Alle unmuten
+      usage: /<command>
+   startlogo:
+      permission: wavecom.logo
+      permissions: wavecom.logo
+      description: Logo
+      usage: /<command>
+

@@ -4,8 +4,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -57,6 +58,8 @@ public class ecomMySQLadmin implements CommandExecutor {
         			return true;
         		} 
         		
+        		Player spieler = Bukkit.getPlayer(args[0]);
+        		
         		if (args[1].equalsIgnoreCase("raquilem") | args[0].equalsIgnoreCase("r") | args[1].equalsIgnoreCase("raquilemer")){
         			
         			try {
@@ -66,7 +69,9 @@ public class ecomMySQLadmin implements CommandExecutor {
 						sampleQueryStatement.executeUpdate();
 						sampleQueryStatement.close(); 
 						sender.sendMessage(ChatColor.YELLOW + "Der Spieler "+args[0]+" wurde in die Stadt "+args[1]+" versetzt!");
-						
+
+						spieler.teleport(new Location(Bukkit.getWorld("ecomMedieval"), -117, 76, 1017));
+						ecomMySQL.perms.playerAddGroup(spieler, "raquileme");
 					} catch (SQLException e) {
 						sender.sendMessage("Datenbankfehler!");
 						e.printStackTrace();
@@ -81,7 +86,9 @@ public class ecomMySQLadmin implements CommandExecutor {
 						sampleQueryStatement.executeUpdate();
 						sampleQueryStatement.close(); 
 						sender.sendMessage(ChatColor.YELLOW + "Der Spieler "+args[0]+" wurde in die Stadt "+args[1]+" versetzt!");
-						
+
+						spieler.teleport(new Location(Bukkit.getWorld("ecomMedieval"), 453, 72, 505));
+						ecomMySQL.perms.playerAddGroup(spieler, "armedanier");
 					} catch (SQLException e) {
 						sender.sendMessage("Datenbankfehler!");
 						e.printStackTrace();
@@ -95,7 +102,9 @@ public class ecomMySQLadmin implements CommandExecutor {
 						sampleQueryStatement.executeUpdate();
 						sampleQueryStatement.close(); 
 						sender.sendMessage(ChatColor.YELLOW + "Der Spieler "+args[0]+" wurde in die Stadt "+args[1]+" versetzt!");
-						
+
+						spieler.teleport(new Location(Bukkit.getWorld("ecomMedieval"), -346, 72, -166));
+						ecomMySQL.perms.playerAddGroup(spieler, "karafiliemer");
 					} catch (SQLException e) {
 						sender.sendMessage("Datenbankfehler!");
 						e.printStackTrace();
@@ -107,7 +116,7 @@ public class ecomMySQLadmin implements CommandExecutor {
         		return true;
     			
     		}
-        }else if(command.getLabel().equals("deljob")) {
+        } else if(command.getLabel().equals("deljob")) {
         	if (ecomMySQL.perms.playerInGroup(player, "admin") | ecomMySQL.perms.playerInGroup(player, "owner")){
         		if(args.length < 1) {
     				sender.sendMessage(ChatColor.GOLD + "Benutzung: /deljob <Spieler> - verändert die Stadt des Spielers. ");
@@ -117,9 +126,8 @@ public class ecomMySQLadmin implements CommandExecutor {
     				return true;
     			}
         		
-        		ecomMySQL x = new ecomMySQL();
         		
-        		if (!x.checkUser(args[0]) == true){
+        		if (!plugin.checkUser(args[0]) == true){
         			sender.sendMessage("Spieler hat keine Stadt!");
         			return true;
         		} 
@@ -128,7 +136,7 @@ public class ecomMySQLadmin implements CommandExecutor {
 				try {
 					conn1 = DriverManager.getConnection(ecomMySQL.url, ecomMySQL.user, ecomMySQL.pass);
 					PreparedStatement sampleQueryStatement;
-					sampleQueryStatement = conn1.prepareStatement("UPDATE  `"+ecomMySQL.user+"`.`stadtverwaltung_spieler`  SET  `lizenz_date` =  'Fri Mar 15 15:44:27 CET 2011'  WHERE  `stadtverwaltung_spieler`.`Spieler` =  '"+args[0]+"';");
+					sampleQueryStatement = conn1.prepareStatement("UPDATE  `"+ecomMySQL.user+"`.`stadtverwaltung_spieler`  SET  `lizenz_date` =  'Fri Mar 15 15:44:27 CET 2011',`viplizenz_date` =  'Fri Mar 15 15:44:27 CET 2011'  WHERE  `stadtverwaltung_spieler`.`Spieler` =  '"+args[0]+"';");
 					sampleQueryStatement.executeUpdate();
 					sampleQueryStatement.close(); 
 					sender.sendMessage(ChatColor.YELLOW + "Der Spieler "+args[0]+" kann jetzt mit /canceljob seinen Job beenden.");
@@ -140,8 +148,7 @@ public class ecomMySQLadmin implements CommandExecutor {
         		return true;
     			
     		}
-        }
-        
+        } 
 		return true;
 	}
 

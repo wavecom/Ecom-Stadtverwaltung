@@ -3,22 +3,16 @@ package de.wavecom_web.bukkit;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import com.sk89q.worldguard.domains.DefaultDomain;
-import com.sk89q.worldguard.protection.ApplicableRegionSet;
-import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
-import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 public class ecomMySQLgetlizenz implements CommandExecutor {
 	
@@ -35,206 +29,115 @@ public class ecomMySQLgetlizenz implements CommandExecutor {
             return true;
         }
         Player player = (Player) sender;
-    	Date dt = new Date();
-    	Connection conn = null;
-    	try {
-			conn = DriverManager.getConnection(ecomMySQL.url, ecomMySQL.user, ecomMySQL.pass);
-		} catch (SQLException e1) {
-			sender.sendMessage("Datenbankfehler");
-			e1.printStackTrace();
-			return true;
-		}
 
     	if(command.getLabel().equals("getlizenz")) {
     		
-    		
-    		ecomMySQL x = new ecomMySQL();
-    		if (!x.checkUser(player.getName()) == true){
+    		if (!plugin.checkUser(player.getName()) == true){
+    			sender.sendMessage("Bitte wähle erst eine Stadt aus!");
     			return true;
     		} 
-    		x.setOwner(player, "grube2");
     		
     		if(args.length < 1) {
     			sender.sendMessage("==================");
     			sender.sendMessage(ChatColor.GOLD + "Jobliste:");
-    			sender.sendMessage(ChatColor.GOLD + "Schmelzer, Gräber, Holzfäller,");
-    			sender.sendMessage(ChatColor.GOLD + "Miner, Jäger, Schmied");
+    			sender.sendMessage(ChatColor.GOLD + "Gräber, Holzfäller,");
+    			sender.sendMessage(ChatColor.GOLD + "Miner, Jäger, Schmied, Händler");
     			sender.sendMessage(ChatColor.RED + "Verwendung: /getlizenz [JOB]");
-    			sender.sendMessage(ChatColor.RED + "Pro Stadt und Job nur 2 Personen!");
+    			sender.sendMessage(ChatColor.RED + "Pro Stadt und Job nur 4 Personen!");
     			return true;
     			
     		} else if(args.length > 1){
     			sender.sendMessage("Error: Zu viele Argumente!");
     			return true;
     		
-    		} else if(ecomMySQL.perms.has(player, "wavecom.lizenz.1")){ //Keine Lizens + 1
-    			ecomMySQL.perms.playerRemove(player, "wavecom.lizenz.inTask.g");
-    			ecomMySQL.perms.playerRemove(player, "wavecom.lizenz.inTask.m");
-    			ecomMySQL.perms.playerRemove(player, "wavecom.lizenz.inTask.h");
-    //Lizenzgebung
-    //Schmelzer		
-    			if (args[0].equalsIgnoreCase("schmelzer")){
+    		} 
+    //Gräber
+    			if (args[0].equalsIgnoreCase("gräber")){
     				
-    				if (x.checkJobLimit("Schmelzer", sender) == false){
+    				if (plugin.checkJobLimit("Gräber", sender) == false){
     					sender.sendMessage("Das maximale Joblimit für diesen Job ist erreicht!");
     					return true;
     				}
-    				
-        			ecomMySQL.perms.playerAdd(player, "wavecom.lizenz.2");
-        			ecomMySQL.perms.playerAdd(player, "-wavecom.lizenz.1");
-    				
-    				try {
-						PreparedStatement sampleQueryStatement;
-						sampleQueryStatement = conn.prepareStatement("UPDATE  `"+ecomMySQL.user+"`.`stadtverwaltung_spieler` SET  `lizenz` =  '"+args[0]+"',`lizenz_date` =  '"+dt+"' WHERE  `stadtverwaltung_spieler`.`Spieler` =  '"+player.getName()+"' LIMIT 1 ;");
-						sampleQueryStatement.executeUpdate();
-						sampleQueryStatement.close(); 
-						ecomMySQL.perms.playerAdd(player, "modifyworld.items.put.ironore.of.furnace");
-						ecomMySQL.perms.playerAdd(player, "modifyworld.items.put.goldore.of.furnace");
-						ecomMySQL.perms.playerAdd(player, "modifyworld.items.take.ironore.of.furnace");
-						ecomMySQL.perms.playerAdd(player, "modifyworld.items.take.goldore.of.furnace");
-						ecomMySQL.perms.playerAdd(player, "modifyworld.items.take.ironingot.of.furnace");
-						ecomMySQL.perms.playerAdd(player, "modifyworld.items.take.goldingot.of.furnace");
-    				} catch (SQLException e) {
-    					sender.sendMessage("Datenbank Fehler");
-    					e.printStackTrace();
+    				if (updateJob(player, "gräber") == true) {
+    					plugin.setOwner(player, "grube1");
+    					plugin.setOwner(player, "grube2");
+    					plugin.setOwner(player, "grube3");
+    					sender.sendMessage(ChatColor.YELLOW + "================================");
+    					sender.sendMessage(ChatColor.YELLOW + "Du bist nun Gräber!");
+    					sender.sendMessage(ChatColor.YELLOW + "In einer Grube kannst du Sand, Kies und Erde abbaun.");
+    					sender.sendMessage(ChatColor.YELLOW + "================================");
     				}
-    				sender.sendMessage(ChatColor.YELLOW + "================================");
-    				sender.sendMessage(ChatColor.YELLOW + "Du bist nun Schmelzer!");
-    				sender.sendMessage(ChatColor.YELLOW + "Als Schmelzer kannst du Erze schmelzen.");
-    				sender.sendMessage(ChatColor.YELLOW + "================================");
-	//Gräber			
-    			} else if (args[0].equalsIgnoreCase("gräber")){
-    				
-    				if (x.checkJobLimit("Gräber", sender) == false){
-    					sender.sendMessage("Das maximale Joblimit für diesen Job ist erreicht!");
-    					return true;
-    				}
-    				
-        			ecomMySQL.perms.playerAdd(player, "wavecom.lizenz.2");
-        			ecomMySQL.perms.playerAdd(player, "-wavecom.lizenz.1");
-    				try {
-    					PreparedStatement sampleQueryStatement;
-						sampleQueryStatement = conn.prepareStatement("UPDATE  `"+ecomMySQL.user+"`.`stadtverwaltung_spieler` SET  `lizenz` =  '"+args[0]+"',`lizenz_date` =  '"+dt+"' WHERE  `stadtverwaltung_spieler`.`Spieler` =  '"+player.getName()+"' LIMIT 1 ;");
-						sampleQueryStatement.executeUpdate();
-						sampleQueryStatement.close(); 
-						ecomMySQL.perms.playerAdd(player, "wavecom.lizenz.inTask.g");
-    				} catch (SQLException e) {
-    					sender.sendMessage("Datenbank Fehler");
-    					e.printStackTrace();
-    				}
-    				sender.sendMessage("Schritt 2:");
-    				sender.sendMessage("Gib bitte /gräberlizenz ein, um die Lizenz zu bestätigen!!!");
 	//Miner			
     			} else if (args[0].equalsIgnoreCase("miner")){
     				
-    				if (x.checkJobLimit("Miner", sender) == false){
+    				if (plugin.checkJobLimit("Miner", sender) == false){
     					sender.sendMessage("Das maximale Joblimit für diesen Job ist erreicht!");
     					return true;
     				}
-    				
-        			ecomMySQL.perms.playerAdd(player, "wavecom.lizenz.2");
-        			ecomMySQL.perms.playerAdd(player, "-wavecom.lizenz.1");
-        			
-    				try {
-    					PreparedStatement sampleQueryStatement;
-						sampleQueryStatement = conn.prepareStatement("UPDATE  `"+ecomMySQL.user+"`.`stadtverwaltung_spieler` SET  `lizenz` =  '"+args[0]+"',`lizenz_date` =  '"+dt+"' WHERE  `stadtverwaltung_spieler`.`Spieler` =  '"+player.getName()+"' LIMIT 1 ;");
-						sampleQueryStatement.executeUpdate();
-						sampleQueryStatement.close(); 
-						ecomMySQL.perms.playerAdd(player, "wavecom.lizenz.inTask.m");
-						
-    				} catch (SQLException e) {
-    					sender.sendMessage("Datenbank Fehler");
-    					e.printStackTrace();
+    				if (updateJob(player, "miner") == true) {
+    					plugin.setOwner(player, "mine1");
+    					plugin.setOwner(player, "mine2");
+    					plugin.setOwner(player, "mine3");
+    					sender.sendMessage(ChatColor.YELLOW + "================================");
+    					sender.sendMessage(ChatColor.YELLOW + "Du bist nun Miner!");
+    					sender.sendMessage(ChatColor.YELLOW + "In einer Mine kannst du Erze abbaun.");
+    					sender.sendMessage(ChatColor.YELLOW + "================================");
     				}
-    				sender.sendMessage("Schritt 2:");
-    				sender.sendMessage("Gib bitte /minerlizenz ein, um die Lizenz zu bestätigen!!!");
 	//Holzfäller			
     			} else if (args[0].equalsIgnoreCase("holzfäller")){
     				
-    				if (x.checkJobLimit("Holzfäller", sender) == false){
+    				if (plugin.checkJobLimit("Holzfäller", sender) == false){
     					sender.sendMessage("Das maximale Joblimit für diesen Job ist erreicht!");
     					return true;
     				}
-    				
-        			ecomMySQL.perms.playerAdd(player, "wavecom.lizenz.2");
-        			ecomMySQL.perms.playerAdd(player, "-wavecom.lizenz.1");
-    				try {
-    					PreparedStatement sampleQueryStatement;
-						sampleQueryStatement = conn.prepareStatement("UPDATE  `"+ecomMySQL.user+"`.`stadtverwaltung_spieler` SET  `lizenz` =  '"+args[0]+"',`lizenz_date` =  '"+dt+"' WHERE  `stadtverwaltung_spieler`.`Spieler` =  '"+player.getName()+"' LIMIT 1 ;");
-						sampleQueryStatement.executeUpdate();
-						sampleQueryStatement.close(); 
-						ecomMySQL.perms.playerAdd(player, "wavecom.lizenz.inTask.h");
-    				} catch (SQLException e) {
-    					sender.sendMessage("Datenbank Fehler");
-    					e.printStackTrace();
+
+    				if (updateJob(player, "holzfäller") == true) {
+    					plugin.setOwner(player, "wald1");
+    					plugin.setOwner(player, "wald2");
+    					plugin.setOwner(player, "wald3");
+    					sender.sendMessage(ChatColor.YELLOW + "================================");
+    					sender.sendMessage(ChatColor.YELLOW + "Du bist nun Holzfäller!");
+    					sender.sendMessage(ChatColor.YELLOW + "In einem Wald kannst du Bäume fällen.");
+    					sender.sendMessage(ChatColor.YELLOW + "================================");
     				}
-    				sender.sendMessage("Schritt 2:");
-    				sender.sendMessage("Gib bitte /holzfällerlizenz ein, um die Lizenz zu bestätigen!!!");
 	//Jäger			
     			} else if (args[0].equalsIgnoreCase("jäger")){
     				
-    				if (x.checkJobLimit("Jäger", sender) == false){
+    				if (plugin.checkJobLimit("Jäger", sender) == false){
     					sender.sendMessage("Das maximale Joblimit für diesen Job ist erreicht!");
     					return true;
     				}
-    				
-        			ecomMySQL.perms.playerAdd(player, "wavecom.lizenz.2");
-        			ecomMySQL.perms.playerAdd(player, "-wavecom.lizenz.1");
-    				try {
-    					PreparedStatement sampleQueryStatement;
-						sampleQueryStatement = conn.prepareStatement("UPDATE  `"+ecomMySQL.user+"`.`stadtverwaltung_spieler` SET  `lizenz` =  '"+args[0]+"',`lizenz_date` =  '"+dt+"' WHERE  `stadtverwaltung_spieler`.`Spieler` =  '"+player.getName()+"' LIMIT 1 ;");
-						sampleQueryStatement.executeUpdate();
-						sampleQueryStatement.close(); 
+    				if (updateJob(player, "jäger") == true) {
 						ecomMySQL.perms.playerAdd(player, "modifyworld.damage.deal.animal.*");
 						ecomMySQL.perms.playerAdd(player, "animalprotect.bypass");
-    				} catch (SQLException e) {
-    					sender.sendMessage("Datenbank Fehler");
-    					e.printStackTrace();
+						sender.sendMessage(ChatColor.YELLOW + "================================");
+						sender.sendMessage(ChatColor.YELLOW + "Du bist nun Jäger!");
+    					sender.sendMessage(ChatColor.YELLOW + "Als Jäger kannst du Tiere töten.");
+    					sender.sendMessage(ChatColor.YELLOW + "================================");
     				}
-    				sender.sendMessage(ChatColor.YELLOW + "================================");
-    				sender.sendMessage(ChatColor.YELLOW + "Du bist nun Jäger!");
-    				sender.sendMessage(ChatColor.YELLOW + "Als Jäger kannst du Tiere töten.");
-    				sender.sendMessage(ChatColor.YELLOW + "================================");
 	//Händler		
     			} else if (args[0].equalsIgnoreCase("händler")){
     				
-    				if (x.checkJobLimit("Jäger", sender) == false){
+    				if (plugin.checkJobLimit("händler", sender) == false){
     					sender.sendMessage("Das maximale Joblimit für diesen Job ist erreicht!");
     					return true;
     				}
-    				
-        			ecomMySQL.perms.playerAdd(player, "wavecom.lizenz.2");
-        			ecomMySQL.perms.playerAdd(player, "-wavecom.lizenz.1");
-    				try {
-    					PreparedStatement sampleQueryStatement;
-						sampleQueryStatement = conn.prepareStatement("UPDATE  `"+ecomMySQL.user+"`.`stadtverwaltung_spieler` SET  `lizenz` =  '"+args[0]+"',`lizenz_date` =  '"+dt+"' WHERE  `stadtverwaltung_spieler`.`Spieler` =  '"+player.getName()+"' LIMIT 1 ;");
-						sampleQueryStatement.executeUpdate();
-						sampleQueryStatement.close(); 
+    				if (updateJob(player, "händler") == true) {
 						ecomMySQL.perms.playerAdd(player, "ChestShop.shop.create.*");
-    				} catch (SQLException e) {
-    					sender.sendMessage("Datenbank Fehler");
-    					e.printStackTrace();
+						sender.sendMessage(ChatColor.YELLOW + "================================");
+						sender.sendMessage(ChatColor.YELLOW + "Du bist nun Händler!");
+						sender.sendMessage(ChatColor.YELLOW + "Du kannst nun ChestShops aufstellen.");
+						sender.sendMessage(ChatColor.YELLOW + "================================");
     				}
-    				sender.sendMessage(ChatColor.YELLOW + "================================");
-    				sender.sendMessage(ChatColor.YELLOW + "Du bist nun Händler!");
-    				sender.sendMessage(ChatColor.YELLOW + "Du kannst nun ChestShops aufstellen.");
-    				sender.sendMessage(ChatColor.YELLOW + "================================");
      //Schmied   			
     			} else if (args[0].equalsIgnoreCase("schmied")){
     				
-    				if (x.checkJobLimit("Schmied", sender) == false){
+    				if (plugin.checkJobLimit("Schmied", sender) == false){
     					sender.sendMessage("Das maximale Joblimit für diesen Job ist erreicht!");
     					return true;
     				}
-    				
-        			ecomMySQL.perms.playerAdd(player, "wavecom.lizenz.2");
-        			ecomMySQL.perms.playerAdd(player, "-wavecom.lizenz.1");
-    				try {
-    					PreparedStatement sampleQueryStatement;
-    					sampleQueryStatement = conn.prepareStatement("UPDATE  `"+ecomMySQL.user+"`.`stadtverwaltung_spieler` SET  `lizenz` =  '"+args[0]+"',`lizenz_date` =  '"+dt+"' WHERE  `stadtverwaltung_spieler`.`Spieler` =  '"+player.getName()+"' LIMIT 1 ;");
-    					sampleQueryStatement.executeUpdate();
-    					sampleQueryStatement.close(); 
 
+    				if (updateJob(player, "schmied") == true) {
     					ecomMySQL.perms.playerAdd(player, "modifyworld.items.craft.ironsword");
     					ecomMySQL.perms.playerAdd(player, "modifyworld.items.craft.stonesword");
     					ecomMySQL.perms.playerAdd(player, "modifyworld.items.craft.diamondsword");
@@ -268,38 +171,85 @@ public class ecomMySQLgetlizenz implements CommandExecutor {
     	    			ecomMySQL.perms.playerAdd(player, "modifyworld.items.take.*.of.anvil");
     	    	    	ecomMySQL.perms.playerAdd(player, "modifyworld.blocks.interact.anvil:*");
     	    	    	ecomMySQL.perms.playerAdd(player, "modifyworld.blocks.interact.anvil");
-				    
-    				} catch (SQLException e) {
-    					sender.sendMessage("Datenbank Fehler");
-    					e.printStackTrace();
+    	    	    	
+						ecomMySQL.perms.playerAdd(player, "modifyworld.items.put.ironore.of.furnace");
+						ecomMySQL.perms.playerAdd(player, "modifyworld.items.put.goldore.of.furnace");
+						ecomMySQL.perms.playerAdd(player, "modifyworld.items.take.ironore.of.furnace");
+						ecomMySQL.perms.playerAdd(player, "modifyworld.items.take.goldore.of.furnace");
+						ecomMySQL.perms.playerAdd(player, "modifyworld.items.take.ironingot.of.furnace");
+						ecomMySQL.perms.playerAdd(player, "modifyworld.items.take.goldingot.of.furnace");
+						
+						sender.sendMessage(ChatColor.YELLOW + "================================");
+						sender.sendMessage(ChatColor.YELLOW + "Du bist nun Schmied!");
+						sender.sendMessage(ChatColor.YELLOW + "Als Schmied kannst du Werkzeuge herstellen");
+						sender.sendMessage(ChatColor.YELLOW + "und Erze einschmelzen.");
+						sender.sendMessage(ChatColor.YELLOW + "================================");
     				}
-    				sender.sendMessage(ChatColor.YELLOW + "================================");
-    				sender.sendMessage(ChatColor.YELLOW + "Du bist nun Schmied!");
-    				sender.sendMessage(ChatColor.YELLOW + "Als Schmied kannst du Werkzeuge herstellen.");
-    				sender.sendMessage(ChatColor.YELLOW + "================================");
-    			}
-    			return true;
-    //Ende Lizenzgebung
-    		
-    		} else if (ecomMySQL.perms.has(player, "wavecom.lizenz.2")){ // eine Lizens + 1 wenn VIP
-    			if (ecomMySQL.perms.has(player, "wavecom.vip")){
-    //Lizenzgebung 2te Lizens VIP
-    				sender.sendMessage(ChatColor.BLACK + "Wilkommen im ewigen schwarzem Nichts!");
-    				sender.sendMessage(ChatColor.RED + "Leider ist die zweite VIP Lizenz noch nich einsatzbereit!");
-    //Ende Lizenzgebung 2te Lizens VIP
-    			
-    			} else {
-    				sender.sendMessage("Du darfst keine weiteren Lizenzen mehr erwerben!");
-    			}
-    			return true;
-    		} else if (ecomMySQL.perms.has(player, "wavecom.lizenz.3")){ // 2 oder mehr = zu viel
-    			sender.sendMessage("Du darfst keine weiteren Lizenzen mehr erwerben!");
-    			return true;
-    		} else {
-    			sender.sendMessage("Error: Es gab ein Fehler bei deinem Lizenzzähler");
-    			return true;
-    		}
-    	}
+    			} //Close Jobcheck
+    			return true; //for Getlizenz
+    		} //Close Command Getlizent
     	return false;
+	}
+	
+	public boolean updateJob (Player player, String job){
+    	Connection conn = null;
+    	boolean lizfrei = false;
+    	boolean viplizfrei = false;
+    	String columvip = "";
+    	Date dt = new Date();
+    	
+    	try {
+			conn = DriverManager.getConnection(ecomMySQL.url, ecomMySQL.user, ecomMySQL.pass);
+		} catch (SQLException e1) {
+			player.sendMessage("Datenbankfehler");
+			e1.printStackTrace();
+			return true;
+		}
+    	
+		try {
+			Statement stmt = conn.createStatement();                 
+			ResultSet rs = stmt.executeQuery("Select lizenz from stadtverwaltung_spieler where Spieler = '"+player.getName()+"'");
+			
+			if (rs.next()){
+				 if (rs.getString(1).equalsIgnoreCase("")){
+					 lizfrei = true;
+				 } else if (ecomMySQL.perms.playerHas(player, "wavecom.vip")){
+					 ResultSet rs2 = stmt.executeQuery("Select viplizenz from stadtverwaltung_spieler where Spieler = '"+player.getName()+"'");
+					 if (rs2.next()){
+						 if (rs2.getString(1).equalsIgnoreCase("")){
+							 viplizfrei = true;
+						 } 
+					 } 
+				 } else {
+					 return false;
+				 }
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			player.sendMessage("SQL Exception");
+			return false;
+		}
+		
+		if (lizfrei = true){
+			columvip = "";
+		} else if (viplizfrei = true){
+			columvip = "vip";
+		} else { 
+			return false;
+		}
+    	
+		try {
+			PreparedStatement sampleQueryStatement;
+			sampleQueryStatement = conn.prepareStatement("UPDATE  `"+ecomMySQL.user+"`.`stadtverwaltung_spieler` SET  `"+columvip+"lizenz` =  '"+job+"',`"+columvip+"lizenz_date` =  '"+dt+"' WHERE  `stadtverwaltung_spieler`.`Spieler` =  '"+player.getName()+"' LIMIT 1 ;");
+			sampleQueryStatement.executeUpdate();
+			sampleQueryStatement.close(); 
+			return true;
+		} catch (SQLException e) {
+			player.sendMessage(ChatColor.RED + "Datenbank Fehler");
+			e.printStackTrace();
+			return false;
+		}
+		
 	}
 }

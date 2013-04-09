@@ -24,7 +24,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChatEvent;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -40,7 +39,7 @@ public final class ecomMySQL extends JavaPlugin implements Listener {
 	
 	List<Player> players = new ArrayList<Player>();
 	
-	public static String url = "jdbc:mysql://localhost:3306/";
+	public static String url = "";
 	public static String user = "";
 	public static String pass = "";
 	 
@@ -48,6 +47,8 @@ public final class ecomMySQL extends JavaPlugin implements Listener {
     public static Economy econ = null;
     public static Permission perms = null;
     public static Chat chat = null;
+    
+    private int taskId;
 
 	public static Server server;
 	public static ArrayList<LivingEntity> spawned = new ArrayList<LivingEntity>();
@@ -59,6 +60,68 @@ public final class ecomMySQL extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
+
+    	if (!AntiTheft.antitheft() == true){
+    		return;
+    	}
+    		
+    	this.taskId = this.getServer().getScheduler().scheduleAsyncRepeatingTask(this, new Runnable() {
+    		public void run() {
+    			if (!AntiTheft.antitheft() == true){
+    				setEnabled(false);
+    				getServer().getScheduler().cancelTask(taskId);
+    			}
+    		}
+    	}, 60L, 12000L);
+  //Config Database  	
+		if(getConfig().contains("db")){
+			try{
+				if(getConfig().get("db") == null){
+					getConfig().set("db", "jdbc:mysql://localhost:3306/ecom");
+					this.saveConfig();
+				}
+				url = getConfig().getString("db");
+			}catch(Exception e){
+				getConfig().set("db", "jdbc:mysql://localhost:3306/ecom");
+				this.saveConfig();
+			}
+		}else{
+			getConfig().set("db", "jdbc:mysql://localhost:3306/ecom");
+			this.saveConfig();
+		}
+		
+		if(getConfig().contains("user")){
+			try{
+				if(getConfig().get("user") == null){
+					getConfig().set("user", "root");
+					this.saveConfig();
+				}
+				user = getConfig().getString("user");
+			}catch(Exception e){
+				getConfig().set("user", "root");
+				this.saveConfig();
+			}
+		}else{
+			getConfig().set("user", "root");
+			this.saveConfig();
+		}
+		
+		if(getConfig().contains("pass")){
+			try{
+				if(getConfig().get("pass") == null){
+					getConfig().set("pass", "12345");
+					this.saveConfig();
+				}
+				pass = getConfig().getString("pass");
+			}catch(Exception e){
+				getConfig().set("pass", "12345");
+				this.saveConfig();
+			}
+		}else{
+			getConfig().set("pass", "12345");
+			this.saveConfig();
+		}
+ //End Config   	
         if (!setupEconomy() ) {
             getServer().getPluginManager().disablePlugin(this);
             return;
@@ -74,7 +137,7 @@ public final class ecomMySQL extends JavaPlugin implements Listener {
         getCommand("getlizenz").setExecutor(new ecomMySQLgetlizenz(this));
         getCommand("canceljob").setExecutor(new ecomMySQLcanceljob(this));
         getCommand("lizenzgetrights").setExecutor(new ecomMySQLlizenzgetrights(this));
-        getCommand("lizenzgetrights").setExecutor(new ecomMySQLlizenzgetrights(this));
+        getCommand("lizenzinfo").setExecutor(new ecomMySQLlizenzinfo(this));
         getCommand("editstadt").setExecutor(new ecomMySQLadmin(this));
         getCommand("deljob").setExecutor(new ecomMySQLadmin(this));
         getCommand("startlogo").setExecutor(new ecomMySQLadmin(this));
@@ -89,6 +152,7 @@ public final class ecomMySQL extends JavaPlugin implements Listener {
     }
 
     private WorldGuardPlugin getWorldGuard() {
+    	
     	if (getServer().getPluginManager().getPlugin("WorldGuard")!=null){
     		WorldGuardPlugin wg = (WorldGuardPlugin) getServer().getPluginManager().getPlugin("WorldGuard");
     		return wg;
@@ -98,14 +162,21 @@ public final class ecomMySQL extends JavaPlugin implements Listener {
     
 
     public boolean setOwner(Player player, String regionName) {
-    	WorldGuardPlugin worldGuard = getWorldGuard();
+    	WorldGuardPlugin worldGuard = (WorldGuardPlugin) getServer().getPluginManager().getPlugin("WorldGuard");
+    	
+    	if (worldGuard == null){
+    		player.sendMessage("Worldguard not loaded");
+    		return false;
+    	}
+    	
     	World world =  Bukkit.getServer().getWorld("ecomMedieval");
     	
         DefaultDomain domain = new DefaultDomain();
-        domain.addPlayer(player.getName());
     	
     	RegionManager rm = worldGuard.getRegionManager(world);
     	ProtectedRegion region = rm.getRegion(regionName);
+    	domain = region.getOwners();
+        domain.addPlayer(player.getName());
     	
     	region.setOwners(domain);
     	
@@ -114,6 +185,35 @@ public final class ecomMySQL extends JavaPlugin implements Listener {
 		} catch (ProtectionDatabaseException e) {
 			return false;
 		}
+    	
+    	return true;
+    }
+
+    public boolean delOwner(Player player, String regionName) {
+    	WorldGuardPlugin worldGuard = (WorldGuardPlugin) getServer().getPluginManager().getPlugin("WorldGuard");
+    	
+    	if (worldGuard == null){
+    		player.sendMessage("Worldguard not loaded");
+    		return false;
+    	}
+    	
+    	World world =  Bukkit.getServer().getWorld("ecomMedieval");
+    	
+        DefaultDomain domain = new DefaultDomain();
+    	
+    	RegionManager rm = worldGuard.getRegionManager(world);
+    	ProtectedRegion region = rm.getRegion(regionName);
+    	domain = region.getOwners();
+        domain.removePlayer(player.getName().toLowerCase());
+    	
+    	region.setOwners(domain);
+    	
+    	try {
+			rm.save();
+		} catch (ProtectionDatabaseException e) {
+			return false;
+		}
+    	
     	return true;
     }
     
@@ -241,6 +341,32 @@ public final class ecomMySQL extends JavaPlugin implements Listener {
 				return false;
 			}
 			
+		} else if (anzahl.equalsIgnoreCase("2")){
+			try {
+				PreparedStatement sampleQueryStatement;
+				sampleQueryStatement = conn.prepareStatement("UPDATE  `stadtverwaltung_limits` SET `"+job+"` =  '3' WHERE  `stadtverwaltung_limits`.`Stadt` = "+stadt+";");
+				sampleQueryStatement.executeUpdate();
+				sampleQueryStatement.close(); 
+				return true;
+			} catch (SQLException e) {
+				sender.sendMessage("Datenbank Fehler");
+				e.printStackTrace();
+				return false;
+			}
+			
+		} else if (anzahl.equalsIgnoreCase("3")){
+			try {
+				PreparedStatement sampleQueryStatement;
+				sampleQueryStatement = conn.prepareStatement("UPDATE  `stadtverwaltung_limits` SET `"+job+"` =  '4' WHERE  `stadtverwaltung_limits`.`Stadt` = "+stadt+";");
+				sampleQueryStatement.executeUpdate();
+				sampleQueryStatement.close(); 
+				return true;
+			} catch (SQLException e) {
+				sender.sendMessage("Datenbank Fehler");
+				e.printStackTrace();
+				return false;
+			}
+			
 		}
 		return false;
     }    
@@ -337,6 +463,32 @@ public final class ecomMySQL extends JavaPlugin implements Listener {
 			try {
 				PreparedStatement sampleQueryStatement;
 				sampleQueryStatement = conn.prepareStatement("UPDATE  `stadtverwaltung_limits` SET `"+job+"` =  '1' WHERE  `stadtverwaltung_limits`.`Stadt` = "+stadt+";");
+				sampleQueryStatement.executeUpdate();
+				sampleQueryStatement.close(); 
+				return true;
+			} catch (SQLException e) {
+				sender.sendMessage("Datenbank Fehler");
+				e.printStackTrace();
+				return false;
+			}
+			
+		} else if (anzahl.equalsIgnoreCase("3")){
+			try {
+				PreparedStatement sampleQueryStatement;
+				sampleQueryStatement = conn.prepareStatement("UPDATE  `stadtverwaltung_limits` SET `"+job+"` =  '2' WHERE  `stadtverwaltung_limits`.`Stadt` = "+stadt+";");
+				sampleQueryStatement.executeUpdate();
+				sampleQueryStatement.close(); 
+				return true;
+			} catch (SQLException e) {
+				sender.sendMessage("Datenbank Fehler");
+				e.printStackTrace();
+				return false;
+			}
+			
+		} else if (anzahl.equalsIgnoreCase("4")){
+			try {
+				PreparedStatement sampleQueryStatement;
+				sampleQueryStatement = conn.prepareStatement("UPDATE  `stadtverwaltung_limits` SET `"+job+"` =  '3' WHERE  `stadtverwaltung_limits`.`Stadt` = "+stadt+";");
 				sampleQueryStatement.executeUpdate();
 				sampleQueryStatement.close(); 
 				return true;

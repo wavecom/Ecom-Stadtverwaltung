@@ -1,6 +1,6 @@
 name: EcomStadtverwaltung
 main: de.wavecom_web.bukkit.ecomMySQL
-version: 1.0
+version: 1.2
 depend: [Vault, WorldGuard] 
 commands:
    stadtkasse:
@@ -11,6 +11,9 @@ commands:
       usage: /<command>
    getlizenz:
       description: Getlizenz.
+      usage: /<command>
+   lizenzinfo:
+      description: Lizenzinfo.
       usage: /<command>
    canceljob:
       description: Job beenden.
